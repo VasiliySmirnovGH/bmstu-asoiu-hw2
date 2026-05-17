@@ -1,0 +1,59 @@
+name: Build, Test & Verify
+
+# ─── Триггеры запуска ────────────────────────────────────────────────────────
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:          # Позволяет перезапускать пайплайн вручную
+
+# ─── Переменные окружения ────────────────────────────────────────────────────
+env:
+  DOTNET_VERSION: '8.0.x'
+  PROJECT_PATH:   'HousingFundApp.csproj'
+
+# ─── Задачи ──────────────────────────────────────────────────────────────────
+jobs:
+  build-and-verify:
+    name: Build Project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # Кеширование пакетов NuGet для ускорения повторных пайплайнов
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: Build (Release Mode)
+        run: dotnet build ${{ env.PROJECT_PATH }} --no-restore --configuration Release
+
+      # Сборка автономного бинарника как артефакта компиляции
+      - name: Publish Build Artifact
+        run: |
+          dotnet publish ${{ env.PROJECT_PATH }} \
+            --configuration Release \
+            --runtime linux-x64 \
+            --self-contained true \
+            --output ./publish/linux-x64
+
+      - name: Upload Artifact to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: HousingFundApp-linux-x64
+          path: ./publish/linux-x64
