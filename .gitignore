@@ -1,0 +1,25 @@
+## .NET build outputs (Скомпилированные файлы и бинарники)
+bin/
+obj/
+out/
+
+## Архивы и временные файлы СУБД SQLite
+*.db
+*.db-journal
+*.db-wal
+
+## Настройки интегрированных сред разработки (IDE)
+.vs/
+.vscode/
+*.user
+*.suo
+*.sln.docstates
+
+## Операционная система
+.DS_Store
+Thumbs.db
+
+## Пакеты NuGet
+packages/
+*.nupkg
+project.lock.json
