@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace YourProjectNamespace // Обязательно замените на namespace вашего проекта (например, DevDepApp)
+namespace YourProjectNamespace 
 {
     class Program
     {
